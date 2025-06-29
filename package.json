@@ -1,0 +1,11 @@
+{
+  "name": "eventora",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/frontend dev & bun run --cwd apps/backend dev"
+  }
+}
