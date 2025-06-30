@@ -34,6 +34,26 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+export const loginUser = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.json({
+        name: user.name,
+        email: user.email,
+        photoURL: user.photoURL,
+        token: generateToken(user._id as string),
+      });
+    } else {
+      res.status(401).json({ message: "Invalid credentials" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+};
+
 const generateToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET as string, {
     expiresIn: "30d",
