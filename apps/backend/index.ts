@@ -1,10 +1,23 @@
-// apps/backend/index.ts
 import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+
+import connectDB from "./src/config/db.ts";
+import authRoutes from "./src/routes/authRoutes.ts";
+
+dotenv.config();
+
+connectDB();
+
 const app = express();
-const PORT = 3000;
 
-app.get("/", (req, res) => res.send("Hello from Bun + Express"));
+app.use(express.json());
+app.use(cors());
 
-app.listen(PORT, () =>
-  console.log(`Backend running on http://localhost:${PORT}`)
-);
+app.use("/api/auth", authRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
