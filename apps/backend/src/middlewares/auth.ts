@@ -1,38 +1,24 @@
 import type { Request, Response, NextFunction } from "express";
-import type { IUser } from "../models/User";
-import User from "../models/User";
 import jwt from "jsonwebtoken";
+import User from "../models/User";
 
-declare module "express" {
-  interface Request {
-    user?: IUser;
-  }
+export interface AuthRequest extends Request {
+  user?: any;
 }
 
-export const authenticate = async (
-  req: Request,
+export const protect = async (
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
-  let token;
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Not authorized" });
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    try {
-      token = req.headers.authorization.split(" ")[1];
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-
-      req.user = await User.findById(decoded.id).select("-password");
-      next();
-    } catch (error) {
-      res.status(401).json({ message: "Not authorized, token failed" });
-    }
+  try {
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    req.user = await User.findById(decoded.id).select("-password");
+    next();
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
   }
-
-  if (!token) {
-    res.status(401).json({ message: "Not authorized, no token" });
-  }
-  next();
 };

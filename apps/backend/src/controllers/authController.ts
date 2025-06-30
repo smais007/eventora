@@ -1,61 +1,40 @@
 import type { Request, Response } from "express";
+import type { IUser } from "../models/User";
 import User from "../models/User";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { hashPassword, comparePassword } from "../utils/hash";
+import { generateToken } from "../utils/jwt";
 
-export const registerUser = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response) => {
   const { name, email, password, photoURL } = req.body;
-
   try {
-    const userExists = await User.findOne({ email });
+    const existing = await User.findOne({ email });
+    if (existing)
+      return res.status(400).json({ message: "Email already used" });
 
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({
+    const hashed = await hashPassword(password);
+    const user: IUser = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashed,
       photoURL,
     });
-
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      photoURL: user.photoURL,
-    });
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
+    res
+      .status(201)
+      .json({ token: generateToken((user._id as string).toString()) });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
   try {
-    const user = await User.findOne({ email });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
-        name: user.name,
-        email: user.email,
-        photoURL: user.photoURL,
-        token: generateToken(user._id as string),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
+    const user = await User.findOne<IUser>({ email });
+    if (!user || !(await comparePassword(password, user.password))) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
+    res.json({ token: generateToken((user!._id as string).toString()), user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
-};
-
-const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, {
-    expiresIn: "30d",
-  });
 };

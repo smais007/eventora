@@ -1,23 +1,25 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
-
-import connectDB from "./src/config/db.ts";
-import authRoutes from "./src/routes/authRoutes.ts";
+import dotenv from "dotenv";
+import connectDB from "./src/config/db";
+import authRoutes from "./src/routes/authRoutes";
+import eventRoutes from "./src/routes/eventRoutes";
 
 dotenv.config();
-
-connectDB();
-
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
+// Middlewares
 app.use(cors());
+app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Start server after DB connects
+connectDB().then(() => {
+  app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`)
+  );
 });
