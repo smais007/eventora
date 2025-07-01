@@ -34,7 +34,7 @@ export const joinEvent = async (req: AuthRequest, res: Response) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    const userId = req.user._id.toString();
+    const userId = req.user._id;
     console.log("userId", userId);
 
     if (event.joinedUsers.includes(userId)) {
