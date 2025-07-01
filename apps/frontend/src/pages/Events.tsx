@@ -175,7 +175,7 @@ const Events = () => {
     <div className="min-h-screen py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Discover Events
           </h1>
           <p className="text-gray-400">
