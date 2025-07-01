@@ -8,16 +8,21 @@ export interface IEvent extends Document {
   description: string;
   attendeeCount: number;
   userId: string;
+  joinedUsers: string[];
 }
 
-const EventSchema = new Schema<IEvent>({
-  title: { type: String, required: true },
-  name: { type: String, required: true },
-  dateTime: { type: Date, required: true },
-  location: { type: String, required: true },
-  description: { type: String, required: true },
-  attendeeCount: { type: Number, default: 0 },
-  userId: { type: String, required: true },
-});
+const EventSchema = new Schema<IEvent>(
+  {
+    title: { type: String, required: true },
+    name: { type: String, required: true },
+    dateTime: { type: Date, required: true },
+    location: { type: String, required: true },
+    description: { type: String, required: true },
+    attendeeCount: { type: Number, default: 0 },
+    userId: { type: String, required: true },
+    joinedUsers: { type: [String], default: [] },
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model<IEvent>("Event", EventSchema);

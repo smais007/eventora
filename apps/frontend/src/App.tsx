@@ -2,7 +2,7 @@ import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -12,6 +12,7 @@ import Events from "./pages/Events";
 import AddEvent from "./pages/AddEvent";
 import MyEvents from "./pages/MyEvents";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      {/* <Sonner /> */}
       <AuthProvider>
         <BrowserRouter>
           <Routes>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import axios from "@/lib/axios";
 
 const AddEvent = () => {
   const [title, setTitle] = useState("");
@@ -33,34 +35,24 @@ const AddEvent = () => {
     setIsLoading(true);
 
     try {
-      const newEvent = {
-        id: Date.now().toString(),
+      const dateTime = new Date(`${date}T${time}`);
+
+      await axios.post("/events", {
         title,
-        name: user?.name || "",
-        date,
-        time,
+        name: user?.name || "Anonymous",
+        dateTime,
         location,
         description,
-        attendeeCount: 0,
-        createdBy: user?.id || "",
-        joinedUsers: [],
-        createdAt: new Date().toISOString(),
-      };
-
-      const existingEvents = JSON.parse(
-        localStorage.getItem("eventSphereEvents") || "[]"
-      );
-      existingEvents.push(newEvent);
-      localStorage.setItem("eventSphereEvents", JSON.stringify(existingEvents));
+      });
 
       toast({
         title: "Event created successfully!",
-        description: `"${title}" has been added to the events list.`,
+        description: `"${title}" has been added.`,
       });
 
       navigate("/events");
     } catch (err: any) {
-      setError(err.message || "Failed to create event");
+      setError(err.response?.data?.message || "Failed to create event");
     } finally {
       setIsLoading(false);
     }
@@ -172,8 +164,7 @@ const AddEvent = () => {
                   className="bg-gray-50"
                 />
                 <p className="text-sm text-gray-500">
-                  Initial attendee count will be 0. It will increase as people
-                  join your event.
+                  Starts at 0 and increases when users join.
                 </p>
               </div>
 

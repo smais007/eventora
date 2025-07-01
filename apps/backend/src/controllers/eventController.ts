@@ -12,6 +12,7 @@ export const addEvent = async (req: AuthRequest, res: Response) => {
       location,
       description,
       userId: req.user._id,
+      joinedUsers: [],
     });
     res.status(201).json(event);
   } catch (err) {
@@ -28,14 +29,27 @@ export const getEvents = async (req: Request, res: Response) => {
   }
 };
 
-export const joinEvent = async (req: Request, res: Response) => {
+export const joinEvent = async (req: AuthRequest, res: Response) => {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const userId = req.user._id.toString();
+    console.log("userId", userId);
+
+    if (event.joinedUsers.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "You have already joined this event." });
+    }
+
     event.attendeeCount += 1;
+    event.joinedUsers.push(userId);
     await event.save();
+
     res.json(event);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error joining event" });
   }
 };
